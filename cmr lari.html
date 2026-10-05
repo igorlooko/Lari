@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Savannah_OS | Calculadora + Marketing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0b0d0f;
+            --bg2: #14171a;
+            --card: #1a1e23;
+            --card2: #22282e;
+            --border: rgba(255,255,255,0.06);
+            --gold: #c9a96e;
+            --gold2: #a88953;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --text: #f0ece4;
+            --text2: #9ca3af;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+        .pb-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .pb-card:hover { border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .pb-card .title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text2);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .pb-card .value { font-size: 24px; font-weight: 700; line-height: 1.2; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            color: #0a0a0a;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 12px;
+            transition: opacity 0.2s, transform 0.15s;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-primary:active { transform: scale(0.96); opacity:0.8; }
+        .btn-primary:hover { opacity:0.85; }
+        .btn-secondary {
+            background: var(--card2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            transition: 0.2s;
+            cursor: pointer;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-secondary:active { background: rgba(255,255,255,0.08); }
+        .sub-tab {
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text2);
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            background: transparent;
+            white-space: nowrap;
+        }
+        .sub-tab:active { transform: scale(0.95); }
+        .sub-tab.active {
+            background: var(--card2);
+            color: white;
+            border-color: rgba(255,255,255,0.08);
+        }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .cal-day {
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.15s;
+            position: relative;
+            min-height: 38px;
+            border: 1px solid transparent;
+        }
+        .cal-day:active { background: rgba(255,255,255,0.10); }
+        .cal-day .dots { display: flex; gap: 2px; margin-top: 2px; flex-wrap: wrap; justify-content: center; }
+        .cal-day .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+        .dot-sessao { background: var(--blue); }
+        .dot-lembrete { background: #22c55e; }
+        .dot-healing { background: var(--purple); }
+        .legenda { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; font-size: 10px; color: var(--text2); margin: 6px 0; }
+        .legenda span::before { content:"●"; margin-right:4px; font-size:12px; }
+        .legenda .sessao::before { color:var(--blue); }
+        .legenda .lembrete::before { color:#22c55e; }
+        .legenda .healing::before { color:var(--purple); }
+        .modal-overlay {
+            position: fixed; inset:0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding:12px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 480px;
+            width: 100%;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-box .close { float:right; background:none; border:none; color:#888; font-size:20px; cursor:pointer; padding:4px 8px; }
+        .modal-box .close:hover { color:#fff; }
+        .notif-drop {
+            position: fixed; top:70px; right:10px;
+            width: calc(100% - 20px);
+            max-width: 340px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: var(--card);
+            border:1px solid var(--border);
+            border-radius:16px;
+            padding:16px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.8);
+            display:none;
+            z-index:1000;
+        }
+        .notif-drop.active { display:block; }
+        .notif-item { padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.04); font-size:13px; color:#d1d5db; }
+        .notif-item:last-child { border-bottom:none; }
+        .notif-badge { position:relative; cursor:pointer; }
+        .notif-badge .count {
+            position:absolute; top:-6px; right:-6px;
+            background:#ef4444; color:#fff; border-radius:50%;
+            width:18px; height:18px; font-size:9px; font-weight:bold;
+            display:flex; align-items:center; justify-content:center;
+            border:2px solid var(--bg);
+        }
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+        }
+        .hub-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            text-align: center;
+        }
+        .hub-card:active { transform: scale(0.96); }
+        .hub-card-icon { font-size: 32px; margin-bottom: 8px; }
+        .hub-card-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .hub-card-desc { font-size: 11px; color: var(--text2); }
+        .group-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .group-title {
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .group-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+        }
+        .group-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        @media (max-width:640px) {
+            .pb-card { padding: 12px; }
+            .pb-card .value { font-size: 20px; }
+            .cal-day { font-size: 11px; min-height: 32px; }
+            .modal-box { padding: 16px; }
+            .sub-tab { padding: 6px 10px; font-size: 11px; }
+            .btn-primary, .btn-secondary { font-size: 12px; padding: 8px 14px; min-height: 40px; }
+            .hub-grid { grid-template-columns: 1fr 1fr; }
+            .hub-card { padding: 14px; }
+            .hub-card-icon { font-size: 28px; }
+            .hub-card-title { font-size: 14px; }
+        }
+        @media (max-width:400px) {
+            .hub-grid { grid-template-columns: 1fr; }
+        }
+        @keyframes float {
+            0%,100%{transform:translateY(0)}
+            50%{transform:translateY(-10px)}
+        }
+        @keyframes shimmer {
+            0%{background-position:-300% 0}
+            100%{background-position:300% 0}
+        }
+        .login-line {
+            height:3px;
+            background: linear-gradient(90deg, #c9a96e, #f5e6a8, #c9a96e);
+            background-size:300% 100%;
+            animation: shimmer 4s linear infinite;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 13px;
+            z-index: 2000;
+            animation: slideUp 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
+        }
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(40px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== CHANGELOG (TELA INICIAL) ===== -->
+    <div id="changelogScreen" class="w-full max-w-[600px] mx-auto">
+        <div class="bg-[#14171a] rounded-2xl p-6 md:p-10 relative overflow-hidden border border-white/5">
+            <div class="text-center mb-5">
+                <span class="text-4xl block mb-2">📰</span>
+                <h1 class="text-2xl font-bold tracking-tight">Novidades v0.9.35</h1>
+            </div>
+            <div class="space-y-3 mb-5 max-h-[50vh] overflow-y-auto">
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                    <h3 class="font-bold text-white mb-1">✨ Calculadora Reformulada</h3>
+                    <p class="text-xs text-gray-400">Cálculo correto: Materiais + Mão de Obra + Comissão Marketing</p>
+                </div>
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                    <h3 class="font-bold text-white mb-1">⏱️ Cronômetro de Sessão</h3>
+                    <p class="text-xs text-gray-400">Controle o tempo de cada tatuagem diretamente no CRM</p>
+                </div>
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                    <h3 class="font-bold text-white mb-1">🏥 Healing Check Automático</h3>
+                    <p class="text-xs text-gray-400">Lembretes automáticos 7 dias após conclusão</p>
+                </div>
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                    <h3 class="font-bold text-white mb-1">🔗 Integrações Aprimoradas</h3>
+                    <p class="text-xs text-gray-400">Calculadora → Calendário → Financeiro em tempo real</p>
+                </div>
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5">
+                    <h3 class="font-bold text-white mb-1">📊 Hub Principal</h3>
+                    <p class="text-xs text-gray-400">Menu intuitivo com acesso a todas as áreas</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <label class="hover:text-white transition flex items-center gap-2 cursor-pointer text-sm text-gray-400 bg-black/20 p-3 rounded-xl border border-white/5">
+                    <i data-lucide="upload" class="w-4 h-4"></i> Importar Key.json
+                    <input type="file" id="importKeyChangelog" accept=".json" class="hidden" onchange="importKeyFromChangelog(event)" />
+                </label>
+                <button onclick="goToHub()" class="w-full py-3 btn-primary text-sm rounded-xl">Ir para o Painel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HUB ===== -->
+    <div id="hubScreen" class="w-full max-w-[1200px] mx-auto hidden">
+        <div class="mb-6">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl md:text-3xl font-bold mb-1">Savannah_<span class="text-[#c9a96e]">OS</span></h1>
+                <p class="text-sm text-gray-400">Selecione uma área para começar</p>
+            </div>
+            <div class="hub-grid">
+                <div class="hub-card" onclick="switchTab('geral')">
+                    <div class="hub-card-icon">📊</div>
+                    <div class="hub-card-title">Geral</div>
+                    <div class="hub-card-desc">Dashboard, financeiro e indicadores</div>
+                </div>
+                <div class="hub-card" onclick="switchTab('tatuagem')">
+                    <div class="hub-card-icon">🖤</div>
+                    <div class="hub-card-title">Tatuagem</div>
+                    <div class="hub-card-desc">Agenda, clientes, estoque e calculadora</div>
+                </div>
+                <div class="hub-card" onclick="switchTab('marketing')">
+                    <div class="hub-card-icon">📢</div>
+                    <div class="hub-card-title">Marketing</div>
+                    <div class="hub-card-desc">Checklist, Campanhas e Concorrência</div>
+                </div>
+                <div class="hub-card" onclick="switchTab('ia')">
+                    <div class="hub-card-icon">🤖</div>
+                    <div class="hub-card-title">Recursos IA</div>
+                    <div class="hub-card-desc">Gerador de resumos e criativo</div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-6 flex flex-wrap justify-center gap-2">
+            <button onclick="downloadJSON()" class="btn-secondary text-xs">📥 Baixar Key.json</button>
+        </div>
+    </div>
+
+    <!-- ===== APP ===== -->
+    <div id="app" class="w-full max-w-[1440px] min-h-[90vh] hidden flex-col gap-3">
+        <header class="bg-[#14171a] rounded-2xl p-3 px-4 flex flex-wrap items-center justify-between gap-2 border border-white/5">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full grad-gold flex items-center justify-center text-black font-bold shadow-lg text-sm">🖤</div>
+                <div>
+                    <h2 class="font-bold text-sm">Savannah_<span class="text-[#c9a96e]">OS</span> <span class="text-[9px] text-gray-500 font-mono">v0.9.35</span></h2>
+                    <p class="text-[9px] text-gray-500 uppercase font-semibold" id="headerSubtitle">Calculadora + Marketing</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="notif-badge" onclick="toggleNotif()">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-300 hover:text-white transition"></i>
+                    <span class="count" id="notifCount">0</span>
+                </div>
+                <button onclick="goToHub()" class="px-3 py-1.5 bg-white/5 hover:bg-blue-500/10 hover:text-blue-400 border border-white/5 rounded-xl text-[10px] font-medium text-gray-400 transition flex items-center gap-1">
+                    <i data-lucide="home" class="w-3.5 h-3.5"></i> Menu
+                </button>
+            </div>
+        </header>
+
+        <div id="notifDrop" class="notif-drop">
+            <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sm">🔔 Notificações</span>
+                <button onclick="closeNotif()" class="text-gray-400 hover:text-white text-xs">✕</button>
+            </div>
+            <div id="notifList"></div>
+        </div>
+
+        <div id="tabContent" class="flex-1 flex flex-col gap-3"></div>
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <div id="dayModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close" onclick="closeDayModal()">✕</button>
+            <h2 class="text-lg font-bold mb-3" id="modalDayTitle">Dia 1/1/2026</h2>
+            <div id="modalEventsList" class="mb-3 space-y-2"></div>
+            <div class="bg-black/20 p-4 rounded-xl border border-white/5 space-y-3">
+                <div class="text-xs font-bold text-gray-400 uppercase">Novo Evento</div>
+                <input type="time" id="newEventTime" class="w-full bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                <input type="text" id="newEventTitle" placeholder="Título do evento" class="w-full bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                <select id="newEventType" class="w-full bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm">
+                    <option value="sessao">Sessão</option>
+                    <option value="lembrete">Lembrete</option>
+                    <option value="healing">Healing</option>
+                </select>
+                <button onclick="addEventToDay()" class="w-full btn-primary text-sm">+ Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ======================================================================
+        // ESTADO GLOBAL
+        // ======================================================================
+        let data = {
+            clients: [],
+            stock: [],
+            portfolio: [],
+            campaigns: [],
+            competitors: [],
+            financial: [],
+            calendarEvents: [],
+            lembretes: [],
+            checklist: [],
+            marketingChecklist: [],
+            historico: [],
+            settings: { comissao: 30, videoUrl: 'https://youtu.be/dQw4w9WgXcQ' }
+        };
+
+        let currentTab = null;
+        let selectedDay = null;
+        let calCtx = { month: new Date().getMonth(), year: new Date().getFullYear() };
+        let sessionTimers = {};
+
+        // ======================================================================
+        // UTILITÁRIOS
+        // ======================================================================
+        function genId() { return Date.now() + Math.random().toString(36).substr(2, 9); }
+        function fmt(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0); }
+        function fmtDate(d) { return d.toLocaleDateString('pt-BR'); }
+
+        function toast(msg, type = 'info') {
+            const el = document.createElement('div');
+            el.className = `toast border-l-4 ${type === 'success' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : type === 'error' ? 'border-red-500 bg-red-500/10 text-red-400' : 'border-blue-500 bg-blue-500/10 text-blue-400'}`;
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+
+        function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+        // ======================================================================
+        // PERSISTÊNCIA
+        // ======================================================================
+        function saveData() {
+            localStorage.setItem('savannah_data', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const stored = localStorage.getItem('savannah_data');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    // Garantir que checklist seja array
+                    if (!Array.isArray(parsed.checklist)) parsed.checklist = [];
+                    if (!Array.isArray(parsed.marketingChecklist)) parsed.marketingChecklist = [];
+                    // Garantir que outros arrays existam
+                    if (!Array.isArray(parsed.clients)) parsed.clients = [];
+                    if (!Array.isArray(parsed.stock)) parsed.stock = [];
+                    if (!Array.isArray(parsed.portfolio)) parsed.portfolio = [];
+                    if (!Array.isArray(parsed.campaigns)) parsed.campaigns = [];
+                    if (!Array.isArray(parsed.competitors)) parsed.competitors = [];
+                    if (!Array.isArray(parsed.financial)) parsed.financial = [];
+                    if (!Array.isArray(parsed.calendarEvents)) parsed.calendarEvents = [];
+                    if (!Array.isArray(parsed.lembretes)) parsed.lembretes = [];
+                    if (!Array.isArray(parsed.historico)) parsed.historico = [];
+                    data = parsed;
+                } catch (e) { console.error('Erro ao carregar dados:', e); }
+            }
+        }
+
+        // ======================================================================
+        // NAVEGAÇÃO
+        // ======================================================================
+        function goToHub() {
+            document.getElementById('changelogScreen').classList.add('hidden');
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('hubScreen').classList.remove('hidden');
+            currentTab = null;
+            refreshIcons();
+        }
+
+        function importKeyFromChangelog(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const r = new FileReader();
+            r.onload = function(ev) {
+                try {
+                    const p = JSON.parse(ev.target.result);
+                    if (p.clients !== undefined) {
+                        // Garantir arrays
+                        if (!Array.isArray(p.checklist)) p.checklist = [];
+                        if (!Array.isArray(p.marketingChecklist)) p.marketingChecklist = [];
+                        data = p;
+                        saveData();
+                        toast('Key importada!', 'success');
+                    } else toast('Arquivo inválido.', 'error');
+                } catch (err) { toast('Erro ao ler arquivo.', 'error'); }
+            };
+            r.readAsText(file);
+            e.target.value = '';
+        }
+
+        function downloadJSON() {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Key.json';
+            a.click();
+            toast('Key.json baixado.', 'success');
+        }
+
+        // ======================================================================
+        // SWITCH TABS
+        // ======================================================================
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('hubScreen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('tabContent').innerHTML = '';
+
+            if (tab === 'geral') {
+                document.getElementById('headerSubtitle').textContent = 'Dashboard + Financeiro';
+                document.getElementById('tabContent').innerHTML = renderGeral();
+                updateDash();
+                renderFin();
+            }
+            if (tab === 'tatuagem') {
+                document.getElementById('headerSubtitle').textContent = 'Gestão de Tatuagens';
+                document.getElementById('tabContent').innerHTML = renderTatuagem();
+                // Inicializa com a sub-aba 'agenda'
+                showSub('agenda');
+            }
+            if (tab === 'marketing') {
+                document.getElementById('headerSubtitle').textContent = 'Marketing';
+                document.getElementById('tabContent').innerHTML = renderMarketing();
+                showMarketingSub('checklist');
+            }
+            if (tab === 'ia') {
+                document.getElementById('headerSubtitle').textContent = 'Recursos IA';
+                document.getElementById('tabContent').innerHTML = renderIA();
+                updateVideo();
+            }
+            genNotifs();
+            refreshIcons();
+        }
+
+        // ======================================================================
+        // GERAL
+        // ======================================================================
+        function renderGeral() {
+            return `
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div class="pb-card"><div class="title">Leads</div><div class="value" id="dashClients">0</div></div>
+                <div class="pb-card"><div class="title">Portfólio</div><div class="value" id="dashPortfolio">0</div></div>
+                <div class="pb-card"><div class="title">Concorrentes</div><div class="value" id="dashCompetitors">0</div></div>
+                <div class="pb-card"><div class="title">Campanhas</div><div class="value" id="dashCampaigns">0</div></div>
+                <div class="pb-card"><div class="title">Saldo</div><div class="value text-emerald-400" id="dashBalance">R$ 0</div></div>
+                <div class="pb-card"><div class="title">ROI</div><div class="value text-cyan-400" id="dashConversion">0%</div></div>
+                <div class="pb-card"><div class="title">Entradas</div><div class="value text-emerald-400" id="chartInValue">R$ 0</div></div>
+                <div class="pb-card"><div class="title">Despesas</div><div class="value text-red-400" id="chartOutValue">R$ 0</div></div>
+            </div>
+            <div id="estoqueCriticoBanner" class="hidden bg-red-500/10 border border-red-500/30 p-3 rounded-xl text-red-400 text-xs mb-3"></div>
+            <div class="pb-card mb-3">
+                <div class="title">Balanço</div>
+                <div class="flex items-center gap-4">
+                    <div class="flex-1"><div class="h-2 bg-white/5 rounded-full overflow-hidden"><div id="chartInBar" class="h-full bg-emerald-500 transition-all" style="width:0%"></div></div></div>
+                    <div class="flex-1"><div class="h-2 bg-white/5 rounded-full overflow-hidden"><div id="chartOutBar" class="h-full bg-red-500 transition-all" style="width:0%"></div></div></div>
+                </div>
+                <div class="flex justify-between text-xs mt-2"><span class="text-gray-400">Entradas</span><span id="chartInValue2">R$ 0</span><span class="text-gray-400">Despesas</span><span id="chartOutValue2">R$ 0</span></div>
+            </div>
+            <div class="pb-card mb-3">
+                <div class="title">Comissão Marketing</div>
+                <div class="flex items-center gap-2">
+                    <input type="number" id="comissaoInput" value="${data.settings.comissao||30}" class="w-20 bg-[#0d0d0d] border border-white/10 rounded-xl px-2 py-1 text-sm text-white" />
+                    <span class="text-xs text-gray-400">%</span>
+                    <button onclick="updateComissao()" class="btn-primary text-xs">Atualizar</button>
+                </div>
+            </div>
+            <div class="pb-card mb-3">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="title">Financeiro</div>
+                    <button onclick="exportFinancialCSV()" class="btn-secondary text-xs">📥 CSV</button>
+                </div>
+                <div id="financialForm" class="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-3 bg-black/20 p-3 rounded-xl border border-white/5">
+                    <select id="finType" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm"><option>Entrada</option><option>Saída</option></select>
+                    <input type="number" id="finAmount" placeholder="Valor" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="text" id="finDesc" placeholder="Descrição" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <button onclick="addFinancial()" class="btn-primary text-sm">+ Lançar</button>
+                </div>
+                <div id="financialList" class="space-y-2 max-h-[300px] overflow-y-auto mb-3"></div>
+                <div id="financialSummary" class="bg-black/20 p-3 rounded-xl border border-white/5 space-y-1"></div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportClientsCSV()" class="btn-secondary text-xs">📊 Clientes CSV</button>
+                <button onclick="exportFinancialCSV()" class="btn-secondary text-xs">💰 Financeiro CSV</button>
+            </div>
+            `;
+        }
+
+        function updateDash() {
+            document.getElementById('dashClients').textContent = data.clients.length;
+            document.getElementById('dashPortfolio').textContent = data.portfolio.length;
+            document.getElementById('dashCompetitors').textContent = data.competitors.length;
+            document.getElementById('dashCampaigns').textContent = data.campaigns.length;
+            const inc = data.financial.filter(f => f.type === 'Entrada').reduce((s, f) => s + (f.amount || 0), 0);
+            const out = data.financial.filter(f => f.type === 'Saída').reduce((s, f) => s + (f.amount || 0), 0);
+            const balance = inc - out;
+            document.getElementById('dashBalance').textContent = fmt(balance);
+            document.getElementById('chartInValue').textContent = fmt(inc);
+            document.getElementById('chartOutValue').textContent = fmt(out);
+            document.getElementById('chartInValue2').textContent = fmt(inc);
+            document.getElementById('chartOutValue2').textContent = fmt(out);
+            const total = inc + out;
+            document.getElementById('chartInBar').style.width = total ? (inc / total * 100) + '%' : '0%';
+            document.getElementById('chartOutBar').style.width = total ? (out / total * 100) + '%' : '0%';
+            const completed = data.campaigns.filter(c => c.status === 'Concluída').length;
+            document.getElementById('dashConversion').textContent = data.campaigns.length ? (completed / data.campaigns.length * 100).toFixed(1) + '%' : '0%';
+        }
+
+        function renderFin() {
+            const container = document.getElementById('financialList');
+            if (!container) return;
+            container.innerHTML = data.financial.map(f => `
+                <div class="flex justify-between items-center p-2 bg-black/20 rounded-lg border border-white/5 text-sm">
+                    <div><span class="font-bold text-white">${f.desc}</span> <span class="text-xs text-gray-400">${fmtDate(new Date(f.id))}</span></div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold ${f.type === 'Entrada' ? 'text-emerald-400' : 'text-red-400'}">${f.type === 'Entrada' ? '+' : '-'} ${fmt(f.amount)}</span>
+                        <button onclick="deleteFinancial('${f.id}')" class="text-red-400 text-xs hover:bg-red-500/10 px-2 py-1 rounded">✕</button>
+                    </div>
+                </div>
+            `).join('');
+
+            const inc = data.financial.filter(f => f.type === 'Entrada').reduce((s, f) => s + (f.amount || 0), 0);
+            const out = data.financial.filter(f => f.type === 'Saída').reduce((s, f) => s + (f.amount || 0), 0);
+            const comissao = inc * (data.settings.comissao / 100);
+            const estudio = inc - comissao;
+            document.getElementById('financialSummary').innerHTML = `
+                <div class="grid grid-cols-2 gap-1 text-xs">
+                    <div><span class="text-gray-400">Entradas:</span> <span class="font-bold text-emerald-400">${fmt(inc)}</span></div>
+                    <div><span class="text-gray-400">Saídas:</span> <span class="font-bold text-red-400">${fmt(out)}</span></div>
+                    <div><span class="text-gray-400">Saldo:</span> <span class="font-bold text-white">${fmt(inc - out)}</span></div>
+                    <div><span class="text-gray-400">Comissão (${data.settings.comissao}%):</span> <span class="font-bold text-yellow-400">${fmt(comissao)}</span></div>
+                    <div class="col-span-2"><span class="text-gray-400">Estúdio:</span> <span class="font-bold text-cyan-400">${fmt(estudio)}</span></div>
+                </div>
+            `;
+        }
+
+        function addFinancial() {
+            const type = document.getElementById('finType').value;
+            const amount = parseFloat(document.getElementById('finAmount').value);
+            const desc = document.getElementById('finDesc').value.trim();
+            if (!amount || !desc) { toast('Preencha todos os campos.', 'error'); return; }
+            data.financial.push({ id: genId(), type, amount, desc });
+            addHist(`Lançamento "${desc}" adicionado (${type})`);
+            saveData();
+            renderFin();
+            updateDash();
+            document.getElementById('finAmount').value = '';
+            document.getElementById('finDesc').value = '';
+            toast('Lançamento adicionado!', 'success');
+        }
+
+        function deleteFinancial(id) {
+            data.financial = data.financial.filter(f => f.id !== id);
+            data.calendarEvents = data.calendarEvents.filter(e => e.financialId !== id);
+            saveData();
+            renderFin();
+            renderCal();
+            updateDash();
+            toast('Lançamento removido.', 'success');
+        }
+
+        function updateComissao() {
+            const val = parseFloat(document.getElementById('comissaoInput').value);
+            if (val >= 0 && val <= 100) {
+                data.settings.comissao = val;
+                saveData();
+                toast('Comissão Marketing atualizada!', 'success');
+                renderFin();
+            } else { toast('Valor inválido (0-100).', 'error'); }
+        }
+
+        // ======================================================================
+        // TATUAGEM
+        // ======================================================================
+        function renderTatuagem() {
+            return `
+            <div class="flex flex-wrap gap-1.5 mb-3 overflow-x-auto pb-1">
+                <button class="sub-tab active" data-sub="agenda" onclick="showSub('agenda')"><i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i> Agenda</button>
+                <button class="sub-tab" data-sub="clientes" onclick="showSub('clientes')"><i data-lucide="users" class="w-4 h-4 inline mr-1"></i> Clientes</button>
+                <button class="sub-tab" data-sub="estoque" onclick="showSub('estoque')"><i data-lucide="package-open" class="w-4 h-4 inline mr-1"></i> Estoque</button>
+                <button class="sub-tab" data-sub="lembretes" onclick="showSub('lembretes')"><i data-lucide="bell" class="w-4 h-4 inline mr-1"></i> Lembretes</button>
+                <button class="sub-tab" data-sub="checklist" onclick="showSub('checklist')"><i data-lucide="check-square" class="w-4 h-4 inline mr-1"></i> Checklist</button>
+                <button class="sub-tab" data-sub="calculadora" onclick="showSub('calculadora')"><i data-lucide="calculator" class="w-4 h-4 inline mr-1"></i> Calculadora</button>
+            </div>
+            <div id="subContent" class="space-y-4"></div>
+            `;
+        }
+
+        function showSub(sub) {
+            document.querySelectorAll('#tabContent .sub-tab[data-sub]').forEach(el => el.classList.toggle('active', el.dataset.sub === sub));
+            const container = document.getElementById('subContent');
+            if (sub === 'agenda') container.innerHTML = renderAgenda();
+            else if (sub === 'clientes') container.innerHTML = renderClientesHTML();
+            else if (sub === 'estoque') container.innerHTML = renderEstoqueHTML();
+            else if (sub === 'lembretes') container.innerHTML = renderLembretesHTML();
+            else if (sub === 'checklist') container.innerHTML = renderChecklistHTML();
+            else if (sub === 'calculadora') container.innerHTML = renderCalculadoraHTML();
+
+            // Chama as funções de renderização específicas após inserir o HTML
+            if (sub === 'agenda') renderCal();
+            else if (sub === 'clientes') renderClientes();
+            else if (sub === 'estoque') renderStock();
+            else if (sub === 'lembretes') renderLembretes();
+            else if (sub === 'checklist') renderChecklist();
+            else if (sub === 'calculadora') renderCalculadora();
+            refreshIcons();
+        }
+
+        // ======================================================================
+        // AGENDA
+        // ======================================================================
+        function renderAgenda() {
+            return `
+            <div class="pb-card">
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                    <div class="title">Agenda</div>
+                    <div class="flex items-center gap-1 bg-black/30 p-1 rounded-xl border border-white/5">
+                        <button onclick="changeMonth(-1)" class="px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs text-gray-300"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                        <span id="calMonthYear" class="text-sm font-bold text-white min-w-[100px] text-center">Janeiro 2026</span>
+                        <button onclick="changeMonth(1)" class="px-2 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs text-gray-300"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+                <div class="legenda"><span class="sessao">Sessão</span><span class="lembrete">Lembrete</span><span class="healing">Healing</span></div>
+                <div id="calendarGrid" class="cal-grid"></div>
+            </div>
+            `;
+        }
+
+        function renderCal() {
+            const grid = document.getElementById('calendarGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const { month, year } = calCtx;
+            const first = new Date(year, month, 1).getDay();
+            const last = new Date(year, month + 1, 0).getDate();
+            const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            document.getElementById('calMonthYear').textContent = `${months[month]} ${year}`;
+
+            for (let i = 0; i < first; i++) {
+                const d = document.createElement('div');
+                d.className = 'cal-day opacity-30';
+                grid.appendChild(d);
+            }
+
+            for (let d = 1; d <= last; d++) {
+                const events = data.calendarEvents.filter(e => e.day === d && e.month === month && e.year === year);
+                const div = document.createElement('div');
+                div.className = 'cal-day';
+                if (events.length) {
+                    const counts = {};
+                    events.forEach(e => { const t = e.tipo || 'sessao'; counts[t] = (counts[t] || 0) + 1; });
+                    const colors = { sessao: 'dot-sessao', lembrete: 'dot-lembrete', healing: 'dot-healing' };
+                    let dotHtml = '';
+                    let total = 0;
+                    for (const [t, q] of Object.entries(counts)) {
+                        const cor = colors[t] || 'dot-sessao';
+                        const limit = Math.min(q, 3);
+                        for (let i = 0; i < limit; i++) dotHtml += `<span class="dot ${cor}"></span>`;
+                        total += q;
+                    }
+                    if (total > 3) dotHtml += `<span class="text-[8px] text-gray-500">+${total-3}</span>`;
+                    div.innerHTML = `<span>${d}</span><div class="dots">${dotHtml}</div>`;
+                } else {
+                    div.textContent = d;
+                }
+                div.onclick = () => openDayModal(d);
+                grid.appendChild(div);
+            }
+        }
+
+        function changeMonth(delta) {
+            calCtx.month += delta;
+            if (calCtx.month < 0) { calCtx.month = 11; calCtx.year--; }
+            if (calCtx.month > 11) { calCtx.month = 0; calCtx.year++; }
+            renderCal();
+            closeDayModal();
+        }
+
+        function openDayModal(day) {
+            selectedDay = day;
+            const { month, year } = calCtx;
+            document.getElementById('modalDayTitle').textContent = `Dia ${day}/${month+1}/${year}`;
+            const events = data.calendarEvents.filter(e => e.day === day && e.month === month && e.year === year);
+            const list = document.getElementById('modalEventsList');
+            if (!events.length) list.innerHTML = '<p class="text-gray-500 text-xs">Nenhum evento.</p>';
+            else {
+                list.innerHTML = events.map(e => `
+                    <div class="flex justify-between items-center p-2 bg-black/20 rounded-lg">
+                        <div><span class="font-bold text-white">${e.title}</span> <span class="text-xs text-gray-400">${e.hora||'--:--'}</span></div>
+                        <button onclick="deleteEvent('${e.id}')" class="text-red-400 text-xs">✕</button>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('dayModal').classList.add('active');
+            document.getElementById('newEventTime').value = '';
+            document.getElementById('newEventTitle').value = '';
+        }
+
+        function closeDayModal() {
+            document.getElementById('dayModal').classList.remove('active');
+            selectedDay = null;
+        }
+
+        function addEventToDay() {
+            if (selectedDay === null) { toast('Selecione um dia.', 'error'); return; }
+            const title = document.getElementById('newEventTitle').value.trim();
+            const hora = document.getElementById('newEventTime').value || '--:--';
+            const tipo = document.getElementById('newEventType').value;
+            if (!title) { toast('Preencha o título.', 'error'); return; }
+            const { month, year } = calCtx;
+            data.calendarEvents.push({ id: genId(), day: selectedDay, month, year, title, hora, tipo });
+            addHist(`Evento "${title}" adicionado`);
+            saveData();
+            renderCal();
+            openDayModal(selectedDay);
+            toast('Evento adicionado!', 'success');
+        }
+
+        function deleteEvent(id) {
+            const evt = data.calendarEvents.find(e => e.id === id);
+            if (evt && evt.financialId) {
+                data.financial = data.financial.filter(f => f.id !== evt.financialId);
+            }
+            data.calendarEvents = data.calendarEvents.filter(e => e.id !== id);
+            saveData();
+            renderCal();
+            if (currentTab === 'geral') {
+                renderFin();
+                updateDash();
+            }
+            if (selectedDay !== null) openDayModal(selectedDay);
+            toast('Evento removido.', 'success');
+        }
+
+        // ======================================================================
+        // CLIENTES
+        // ======================================================================
+        function renderClientesHTML() {
+            return `
+            <div class="pb-card">
+                <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                    <div class="title">Clientes</div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400" id="clientCount">0</span>
+                        <select id="clientFilterStage" onchange="renderClientes()" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-2 py-1 text-xs text-white">
+                            <option value="todos">Todos</option>
+                            <option value="Briefing">Briefing</option>
+                            <option value="Desenho">Desenho</option>
+                            <option value="Ativo">Ativo</option>
+                            <option value="Pausado">Pausado</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="clientForm" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 bg-black/20 p-3 rounded-xl border border-white/5">
+                    <input type="text" id="clientName" placeholder="Nome *" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="tel" id="clientPhone" placeholder="Telefone" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <select id="clientStage" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm">
+                        <option>Briefing</option><option>Desenho</option><option>Ativo</option><option>Pausado</option><option>Concluído</option>
+                    </select>
+                    <input type="text" id="clientInsta" placeholder="Instagram" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <select id="clientOrigin" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm">
+                        <option>Orgânico (Instagram)</option><option>Tráfego Pago (Meta)</option><option>Indicação</option><option>Google</option><option>Evento/Feira</option>
+                    </select>
+                    <textarea id="clientBriefing" placeholder="Briefing" class="sm:col-span-3 bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm h-16"></textarea>
+                    <button onclick="submitClient()" class="btn-primary sm:col-span-3 text-sm">+ Adicionar</button>
+                </div>
+                <div id="clientList" class="space-y-3"></div>
+            </div>
+            `;
+        }
+
+        function renderClientes() {
+            const container = document.getElementById('clientList');
+            if (!container) return;
+            const filter = document.getElementById('clientFilterStage')?.value || 'todos';
+            const filtered = filter === 'todos' ? data.clients : data.clients.filter(c => c.stage === filter);
+            document.getElementById('clientCount').textContent = filtered.length;
+            container.innerHTML = filtered.map(c => {
+                const totalGasto = data.financial.filter(f => f.type === 'Entrada' && f.desc.toLowerCase().includes(c.name.toLowerCase())).reduce((s, f) => s + f.amount, 0);
+                return `
+                <div class="p-3 bg-black/20 border border-white/5 rounded-xl space-y-1 text-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-bold text-white">${c.name}</div>
+                            <div class="text-xs text-gray-400">📍 ${c.origem || 'N/I'} | <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">${c.stage}</span></div>
+                            <div class="text-xs text-emerald-400">Total: ${fmt(totalGasto)}</div>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="startSessionTimer('${c.id}')" id="timerBtn${c.id}" class="text-yellow-400 text-xs hover:bg-yellow-500/10 px-2 py-1 rounded">⏱️</button>
+                            <button onclick="editClient('${c.id}')" class="text-blue-400 text-xs hover:bg-blue-500/10 px-2 py-1 rounded">✏️</button>
+                            <button onclick="deleteClient('${c.id}')" class="text-red-400 text-xs hover:bg-red-500/10 px-2 py-1 rounded">🗑️</button>
+                        </div>
+                    </div>
+                    ${c.phone ? `<div class="text-xs text-gray-400">📞 ${c.phone}</div>` : ''}
+                    ${c.insta ? `<div class="text-xs"><a href="https://instagram.com/${c.insta.replace('@', '')}" target="_blank" class="text-pink-400 hover:underline">📸 ${c.insta}</a></div>` : ''}
+                    ${c.briefing ? `<div class="text-xs text-gray-400 bg-black/20 p-2 rounded">📝 ${c.briefing}</div>` : ''}
+                    <div id="timerDisplay${c.id}" class="text-xs text-gray-400"></div>
+                </div>
+                `;
+            }).join('') || '<p class="text-center text-gray-500 text-xs py-4">Nenhum cliente.</p>';
+            refreshIcons();
+        }
+
+        function submitClient() {
+            const name = document.getElementById('clientName').value.trim();
+            if (!name) { toast('Preencha o nome.', 'error'); return; }
+            const phone = document.getElementById('clientPhone').value.trim();
+            const stage = document.getElementById('clientStage').value;
+            const insta = document.getElementById('clientInsta').value.trim();
+            const origem = document.getElementById('clientOrigin').value;
+            const briefing = document.getElementById('clientBriefing').value.trim();
+            const editId = document.getElementById('clientEditId')?.value;
+            if (editId) {
+                const c = data.clients.find(x => x.id == editId);
+                if (c) { c.name = name; c.phone = phone; c.stage = stage; c.insta = insta; c.origem = origem; c.briefing = briefing; addHist(`Cliente "${name}" atualizado`); }
+                document.getElementById('clientEditId').value = '';
+                document.getElementById('clientSubmitBtn').textContent = '+ Adicionar';
+            } else {
+                data.clients.push({ id: genId(), name, phone, stage, insta, origem, briefing, tempoSessao: 0 });
+                addHist(`Cliente "${name}" cadastrado`);
+            }
+            ['clientName', 'clientPhone', 'clientInsta', 'clientBriefing'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('clientStage').value = 'Briefing';
+            saveData();
+            renderClientes();
+            updateDash();
+            toast('Cliente salvo!', 'success');
+        }
+
+        function editClient(id) {
+            const c = data.clients.find(x => x.id == id);
+            if (!c) return;
+            document.getElementById('clientName').value = c.name;
+            document.getElementById('clientPhone').value = c.phone || '';
+            document.getElementById('clientStage').value = c.stage || 'Briefing';
+            document.getElementById('clientInsta').value = c.insta || '';
+            document.getElementById('clientOrigin').value = c.origem || 'Orgânico (Instagram)';
+            document.getElementById('clientBriefing').value = c.briefing || '';
+            document.getElementById('clientEditId').value = c.id;
+            document.getElementById('clientSubmitBtn').textContent = '🔄 Atualizar';
+            toast('Edite e clique em Atualizar.', 'success');
+        }
+
+        function deleteClient(id) {
+            const c = data.clients.find(x => x.id == id);
+            if (c) addHist(`Cliente "${c.name}" removido`);
+            data.clients = data.clients.filter(c => c.id != id);
+            saveData();
+            renderClientes();
+            updateDash();
+            toast('Cliente removido.', 'success');
+        }
+
+        function startSessionTimer(id) {
+            const c = data.clients.find(x => x.id == id);
+            if (!c) return;
+            if (sessionTimers[id]) {
+                clearInterval(sessionTimers[id]);
+                delete sessionTimers[id];
+                document.getElementById(`timerBtn${id}`).textContent = '⏱️';
+                document.getElementById(`timerDisplay${id}`).textContent = '';
+                toast('Sessão finalizada!', 'success');
+                c.tempoSessao = (c.tempoSessao || 0) + 1;
+                addHist(`Sessão de ${c.name} finalizada`);
+                saveData();
+            } else {
+                let seconds = 0;
+                sessionTimers[id] = setInterval(() => {
+                    seconds++;
+                    const mins = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    document.getElementById(`timerDisplay${id}`).textContent = `⏱️ ${mins}m ${secs}s`;
+                }, 1000);
+                document.getElementById(`timerBtn${id}`).textContent = '⏹️';
+                toast('Cronômetro iniciado!', 'success');
+            }
+        }
+
+        // ======================================================================
+        // ESTOQUE
+        // ======================================================================
+        function renderEstoqueHTML() {
+            return `
+            <div class="pb-card">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="title">Estoque</div>
+                    <span class="text-xs text-gray-400" id="stockCount">0</span>
+                </div>
+                <div id="stockForm" class="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-3 bg-black/20 p-3 rounded-xl border border-white/5">
+                    <input type="text" id="stockName" placeholder="Nome *" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="number" id="stockQty" placeholder="Quantidade" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="number" id="stockPrice" placeholder="Preço Unitário" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="url" id="stockLink" placeholder="Link de Compra" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <button onclick="submitStock()" class="btn-primary sm:col-span-4 text-sm">+ Cadastrar</button>
+                </div>
+                <div id="stockList" class="space-y-3"></div>
+            </div>
+            `;
+        }
+
+        function renderStock() {
+            const container = document.getElementById('stockList');
+            if (!container) return;
+            document.getElementById('stockCount').textContent = data.stock.length;
+            const critical = data.stock.filter(s => s.qty <= 3);
+            const banner = document.getElementById('estoqueCriticoBanner');
+            if (banner) {
+                if (critical.length > 0) {
+                    banner.classList.remove('hidden');
+                    banner.textContent = `⚠️ Estoque crítico: ${critical.map(s => `${s.name} (${s.qty})`).join(', ')}`;
+                } else {
+                    banner.classList.add('hidden');
+                }
+            }
+            container.innerHTML = data.stock.map(s => {
+                const status = s.qty > 10 ? 'Abastecido' : s.qty > 3 ? 'Baixo Nível' : 'Esgotado';
+                const statusColor = s.qty > 10 ? 'text-emerald-400' : s.qty > 3 ? 'text-yellow-400' : 'text-red-400';
+                let linkHref = s.link || '';
+                if (linkHref && !linkHref.match(/^https?:\/\//i)) linkHref = 'https://' + linkHref;
+                return `
+                <div class="p-3 bg-black/20 border border-white/5 rounded-xl flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <div class="font-bold text-white text-sm">${s.name}</div>
+                        <div class="text-xs text-gray-400">Qty: ${s.qty} | Preço: ${fmt(s.price || 0)} | Status: <span class="${statusColor}">${status}</span></div>
+                        ${linkHref ? `<div class="text-xs"><a href="${linkHref}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">🔗 Comprar</a></div>` : ''}
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="adjustStock('${s.id}', 1)" class="text-emerald-400 text-xs hover:bg-emerald-500/10 px-2 py-1 rounded">+</button>
+                        <button onclick="adjustStock('${s.id}', -1)" class="text-red-400 text-xs hover:bg-red-500/10 px-2 py-1 rounded">−</button>
+                        <button onclick="editStock('${s.id}')" class="text-blue-400 text-xs hover:bg-blue-500/10 px-2 py-1 rounded">✏️</button>
+                        <button onclick="deleteStock('${s.id}')" class="text-red-400 text-xs hover:bg-red-500/10 px-2 py-1 rounded">🗑️</button>
+                    </div>
+                </div>
+                `;
+            }).join('') || '<p class="text-center text-gray-500 text-xs py-4">Nenhum insumo.</p>';
+        }
+
+        function submitStock() {
+            const name = document.getElementById('stockName').value.trim();
+            if (!name) { toast('Preencha o nome.', 'error'); return; }
+            const qty = parseInt(document.getElementById('stockQty').value) || 0;
+            const price = parseFloat(document.getElementById('stockPrice').value) || 0;
+            const link = document.getElementById('stockLink').value.trim();
+            const editId = document.getElementById('stockEditId')?.value;
+            if (editId) {
+                const s = data.stock.find(x => x.id == editId);
+                if (s) { s.name = name; s.qty = qty; s.price = price; s.link = link; addHist(`Insumo "${name}" atualizado`); }
+                document.getElementById('stockEditId').value = '';
+                document.getElementById('stockSubmitBtn').textContent = '+ Cadastrar';
+            } else {
+                data.stock.push({ id: genId(), name, qty, price, link });
+                addHist(`Insumo "${name}" cadastrado`);
+            }
+            ['stockName', 'stockQty', 'stockPrice', 'stockLink'].forEach(id => document.getElementById(id).value = '');
+            saveData();
+            renderStock();
+            toast('Insumo salvo!', 'success');
+        }
+
+        function editStock(id) {
+            const s = data.stock.find(x => x.id == id);
+            if (!s) return;
+            document.getElementById('stockName').value = s.name;
+            document.getElementById('stockQty').value = s.qty;
+            document.getElementById('stockPrice').value = s.price || '';
+            document.getElementById('stockLink').value = s.link || '';
+            document.getElementById('stockEditId').value = s.id;
+            document.getElementById('stockSubmitBtn').textContent = '🔄 Atualizar';
+            toast('Edite e clique em Atualizar.', 'success');
+        }
+
+        function deleteStock(id) {
+            const s = data.stock.find(x => x.id == id);
+            if (s) addHist(`Insumo "${s.name}" removido`);
+            data.stock = data.stock.filter(s => s.id != id);
+            saveData();
+            renderStock();
+            toast('Insumo removido.', 'success');
+        }
+
+        function adjustStock(id, delta) {
+            const s = data.stock.find(x => x.id == id);
+            if (s) {
+                s.qty = Math.max(0, s.qty + delta);
+                saveData();
+                renderStock();
+            }
+        }
+
+        // ======================================================================
+        // LEMBRETES
+        // ======================================================================
+        function renderLembretesHTML() {
+            return `
+            <div class="pb-card">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="title">Lembretes</div>
+                    <span class="text-xs text-gray-400" id="lembreteCount">0</span>
+                </div>
+                <div id="lembreteForm" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 bg-black/20 p-3 rounded-xl border border-white/5">
+                    <input type="text" id="lembreteName" placeholder="Nome do cliente *" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="number" id="lembreteDay" placeholder="Dias para contatar" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <button onclick="submitLembrete()" class="btn-primary text-sm">+ Criar</button>
+                </div>
+                <div id="lembreteList" class="space-y-3"></div>
+            </div>
+            `;
+        }
+
+        function renderLembretes() {
+            const container = document.getElementById('lembreteList');
+            if (!container) return;
+            document.getElementById('lembreteCount').textContent = data.lembretes.length;
+            const hoje = new Date();
+            container.innerHTML = data.lembretes.map(l => {
+                const d = new Date(l.dataLembrete);
+                const diff = Math.ceil((d - hoje) / (1000 * 60 * 60 * 24));
+                let status = '🔔 Em breve';
+                if (l.concluido) status = '✔ Concluído';
+                else if (diff < 0) status = '⏰ Atrasado';
+                else if (diff <= 3) status = '🔔 Em breve';
+                else status = `${diff} dias`;
+                return `
+                <div class="p-3 bg-black/20 border border-white/5 rounded-xl flex justify-between items-center">
+                    <div><span class="font-bold text-white">${l.nome}</span> <span class="text-xs text-gray-400">${fmtDate(d)} | ${status}</span></div>
+                    <div class="flex gap-1">
+                        <button onclick="completeLembrete('${l.id}')" class="text-emerald-400 text-xs hover:bg-emerald-500/10 px-2 py-1 rounded">✔</button>
+                        <button onclick="deleteLembrete('${l.id}')" class="text-red-400 text-xs hover:bg-red-500/10 px-2 py-1 rounded">🗑️</button>
+                    </div>
+                </div>
+                `;
+            }).join('') || '<p class="text-center text-gray-500 text-xs py-4">Nenhum lembrete.</p>';
+        }
+
+        function submitLembrete() {
+            const nome = document.getElementById('lembreteName').value.trim();
+            const dias = parseInt(document.getElementById('lembreteDay').value) || 0;
+            if (!nome) { toast('Preencha o nome.', 'error'); return; }
+            const dataLembrete = new Date();
+            dataLembrete.setDate(dataLembrete.getDate() + dias);
+            data.lembretes.push({ id: genId(), nome, dataLembrete: dataLembrete.toISOString(), concluido: false });
+            const d = dataLembrete.getDate(), m = dataLembrete.getMonth(), y = dataLembrete.getFullYear();
+            data.calendarEvents.push({ id: genId(), day: d, month: m, year: y, title: `🔔 Contatar ${nome}`, hora: '--:--', tipo: 'lembrete' });
+            addHist(`Lembrete para "${nome}" criado`);
+            saveData();
+            renderLembretes();
+            renderCal();
+            document.getElementById('lembreteName').value = '';
+            document.getElementById('lembreteDay').value = '';
+            toast('Lembrete criado!', 'success');
+        }
+
+        function completeLembrete(id) {
+            const l = data.lembretes.find(x => x.id == id);
+            if (l) { l.concluido = true; addHist(`Lembrete "${l.nome}" concluído`); saveData(); renderLembretes(); toast('Lembrete concluído!', 'success'); }
+        }
+
+        function deleteLembrete(id) {
+            const l = data.lembretes.find(x => x.id == id);
+            if (l) addHist(`Lembrete "${l.nome}" removido`);
+            data.lembretes = data.lembretes.filter(l => l.id != id);
+            saveData();
+            renderLembretes();
+        }
+
+        // ======================================================================
+        // CHECKLIST (Tatuagem)
+        // ======================================================================
+        function renderChecklistHTML() {
+            return `
+            <div class="pb-card">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="title">Checklist do Dia</div>
+                    <button onclick="resetChecklist()" class="btn-secondary text-xs">Resetar</button>
+                </div>
+                <div id="checklistForm" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 bg-black/20 p-3 rounded-xl border border-white/5">
+                    <input type="text" id="checklistItem" placeholder="Novo item" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <button onclick="addChecklistItem()" class="btn-primary text-sm">+ Adicionar</button>
+                </div>
+                <div id="checklistList" class="space-y-2"></div>
+            </div>
+            `;
+        }
+
+        function renderChecklist() {
+            console.log('renderChecklist chamada');
+            const container = document.getElementById('checklistList');
+            if (!container) {
+                console.error('Container checklistList NÃO ENCONTRADO!');
+                return;
+            }
+            // Garantir que data.checklist é array
+            if (!Array.isArray(data.checklist)) {
+                console.warn('data.checklist não é array, corrigindo...');
+                data.checklist = [];
+            }
+            const today = new Date().toDateString();
+            const todayChecklist = data.checklist.filter(c => c.date === today);
+            console.log(`Itens de hoje: ${todayChecklist.length}`);
+            if (todayChecklist.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 text-xs py-4">Nenhum item para hoje.</p>';
+                return;
+            }
+            container.innerHTML = todayChecklist.map(c => `
+                <div class="flex items-center gap-2 p-2 bg-black/20 rounded-lg">
+                    <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleChecklistItem('${c.id}')" class="w-4 h-4 cursor-pointer" />
+                    <span class="flex-1 text-sm ${c.done ? 'line-through text-gray-500' : 'text-white'}">${c.text}</span>
+                    <button onclick="deleteChecklistItem('${c.id}')" class="text-red-400 text-xs hover:bg-red-500/10 px-2 py-1 rounded">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function addChecklistItem() {
+            console.log('addChecklistItem chamada');
+            const input = document.getElementById('checklistItem');
+            if (!input) {
+                console.error('Campo checklistItem não encontrado');
+                toast('Erro no campo de entrada.', 'error');
+                return;
+            }
+            const text = input.value.trim();
+            if (!text) {
+                toast('Preencha o item.', 'error');
+                return;
+            }
+            // Garantir que data.checklist é array
+            if (!Array.isArray(data.checklist)) {
+                console.warn('data.checklist não é array, corrigindo...');
+                data.checklist = [];
+            }
+            const today = new Date().toDateString();
+            data.checklist.push({ id: genId(), text, date: today, done: false });
+            saveData();
+            console.log('Item adicionado, chamando renderChecklist');
+            renderChecklist();
+            input.value = '';
+            toast('Item adicionado!', 'success');
+        }
+
+        function toggleChecklistItem(id) {
+            if (!Array.isArray(data.checklist)) data.checklist = [];
+            const c = data.checklist.find(x => x.id == id);
+            if (c) {
+                c.done = !c.done;
+                saveData();
+                renderChecklist();
+            }
+        }
+
+        function deleteChecklistItem(id) {
+            if (!Array.isArray(data.checklist)) data.checklist = [];
+            data.checklist = data.checklist.filter(c => c.id != id);
+            saveData();
+            renderChecklist();
+        }
+
+        function resetChecklist() {
+            console.log('resetChecklist chamada');
+            if (!Array.isArray(data.checklist)) data.checklist = [];
+            const today = new Date().toDateString();
+            data.checklist = data.checklist.filter(c => c.date !== today);
+            saveData();
+            renderChecklist();
+            toast('Checklist resetado!', 'success');
+        }
+
+        // ======================================================================
+        // CALCULADORA
+        // ======================================================================
+        function renderCalculadoraHTML() {
+            return `
+            <div class="pb-card">
+                <div class="title mb-3">Calculadora de Tatuagem</div>
+                <div class="bg-black/20 p-3 rounded-xl border border-white/5 mb-3 space-y-1 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-400">Materiais:</span><span id="calcMaterials" class="font-bold">R$ 0</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Mão de Obra:</span><span id="calcLabor" class="font-bold">R$ 0</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Subtotal:</span><span id="calcSubtotal" class="font-bold">R$ 0</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Comissão (${data.settings.comissao}%):</span><span id="calcCommission" class="font-bold text-yellow-400">R$ 0</span></div>
+                    <div class="border-t border-white/10 pt-1 flex justify-between font-bold"><span class="text-gray-400">Total:</span><span id="calcTotal" class="text-emerald-400">R$ 0</span></div>
+                </div>
+                <div class="mb-3">
+                    <div class="text-xs font-bold text-gray-400 uppercase mb-1">Insumos</div>
+                    <div id="calcItemsList" class="space-y-2 max-h-[250px] overflow-y-auto"></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                    <input type="number" id="calcLaborValue" placeholder="Mão de Obra (R$)" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <button onclick="calculateTotal()" class="btn-primary text-sm">Calcular</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input type="number" id="calcDay" placeholder="Dia do mês" min="1" max="31" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <button onclick="registerCalculation()" class="btn-primary text-sm">📅 Registrar</button>
+                    <button onclick="clearCalculator()" class="btn-secondary text-sm">Limpar</button>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderCalculadora() {
+            const container = document.getElementById('calcItemsList');
+            if (!container) return;
+            container.innerHTML = data.stock.map(s => `
+                <div class="flex items-center gap-2 p-2 bg-black/20 rounded-lg text-sm">
+                    <span class="flex-1">${s.name}</span>
+                    <span class="text-gray-400">${fmt(s.price || 0)}</span>
+                    <input type="number" id="qty_${s.id}" value="0" min="0" class="w-14 bg-[#0d0d0d] border border-white/10 rounded px-2 py-1 text-xs text-center" />
+                </div>
+            `).join('');
+        }
+
+        function calculateTotal() {
+            let totalMaterials = 0;
+            data.stock.forEach(s => {
+                const qty = parseInt(document.getElementById(`qty_${s.id}`)?.value || 0);
+                totalMaterials += qty * (s.price || 0);
+            });
+            const labor = parseFloat(document.getElementById('calcLaborValue').value) || 0;
+            const subtotal = totalMaterials + labor;
+            const commission = subtotal * (data.settings.comissao / 100);
+            const total = subtotal + commission;
+            document.getElementById('calcMaterials').textContent = fmt(totalMaterials);
+            document.getElementById('calcLabor').textContent = fmt(labor);
+            document.getElementById('calcSubtotal').textContent = fmt(subtotal);
+            document.getElementById('calcCommission').textContent = fmt(commission);
+            document.getElementById('calcTotal').textContent = fmt(total);
+            window._lastCalcTotal = total;
+            window._lastCalcMaterials = totalMaterials;
+            window._lastCalcLabor = labor;
+        }
+
+        function registerCalculation() {
+            if (!window._lastCalcTotal) { toast('Calcule primeiro.', 'error'); return; }
+            const day = parseInt(document.getElementById('calcDay').value);
+            if (!day || day < 1 || day > 31) { toast('Dia inválido.', 'error'); return; }
+            const { month, year } = calCtx;
+            const total = window._lastCalcTotal;
+            const materials = window._lastCalcMaterials;
+            const finId = genId();
+            data.financial.push({ id: finId, type: 'Entrada', amount: total, desc: `Tatuagem - ${fmt(total)}` });
+            data.calendarEvents.push({
+                id: genId(), day, month, year,
+                title: `Tatuagem - ${fmt(total)} (${fmt(materials)} insumos)`,
+                hora: '--:--', tipo: 'sessao', financialId: finId
+            });
+            addHist(`Tatuagem registrada: ${fmt(total)}`);
+            saveData();
+            renderCal();
+            renderFin();
+            updateDash();
+            clearCalculator();
+            toast('Tatuagem registrada no calendário e financeiro!', 'success');
+        }
+
+        function clearCalculator() {
+            data.stock.forEach(s => {
+                const el = document.getElementById(`qty_${s.id}`);
+                if (el) el.value = '0';
+            });
+            document.getElementById('calcLaborValue').value = '';
+            document.getElementById('calcDay').value = '';
+            document.getElementById('calcMaterials').textContent = 'R$ 0';
+            document.getElementById('calcLabor').textContent = 'R$ 0';
+            document.getElementById('calcSubtotal').textContent = 'R$ 0';
+            document.getElementById('calcCommission').textContent = 'R$ 0';
+            document.getElementById('calcTotal').textContent = 'R$ 0';
+            window._lastCalcTotal = 0;
+        }
+
+        // ======================================================================
+        // MARKETING
+        // ======================================================================
+        function renderMarketing() {
+            return `
+            <div class="flex flex-wrap gap-1.5 mb-3 overflow-x-auto pb-1">
+                <button class="sub-tab active" data-sub="checklist" onclick="showMarketingSub('checklist')"><i data-lucide="check-square" class="w-4 h-4 inline mr-1"></i> Checklist</button>
+                <button class="sub-tab" data-sub="campanhas" onclick="showMarketingSub('campanhas')"><i data-lucide="megaphone" class="w-4 h-4 inline mr-1"></i> Campanhas</button>
+                <button class="sub-tab" data-sub="concorrencia" onclick="showMarketingSub('concorrencia')"><i data-lucide="eye" class="w-4 h-4 inline mr-1"></i> Concorrência</button>
+            </div>
+            <div id="marketingSubContent" class="space-y-4"></div>
+            `;
+        }
+
+        function showMarketingSub(sub) {
+            document.querySelectorAll('#tabContent .sub-tab[data-sub]').forEach(el => el.classList.toggle('active', el.dataset.sub === sub));
+            const container = document.getElementById('marketingSubContent');
+            if (sub === 'checklist') container.innerHTML = renderMarketingChecklistHTML();
+            else if (sub === 'campanhas') container.innerHTML = renderCampanhasHTML();
+            else container.innerHTML = renderConcorrenciaHTML();
+
+            if (sub === 'checklist') renderMarketingChecklist();
+            else if (sub === 'campanhas') renderCampaigns();
+            else renderCompetitors();
+            refreshIcons();
+        }
+
+        // --- Checklist Marketing ---
+        function renderMarketingChecklistHTML() {
+            return `
+            <div class="pb-card">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="title">Checklist de Marketing</div>
+                    <button onclick="addMarketingGroup()" class="btn-primary text-xs">+ Grupo</button>
+                </div>
+                <div id="marketingGroupsContainer" class="space-y-4"></div>
+            </div>
+            `;
+        }
+
+        function renderMarketingChecklist() {
+            const container = document.getElementById('marketingGroupsContainer');
+            if (!container) return;
+            if (!Array.isArray(data.marketingChecklist)) data.marketingChecklist = [];
+            container.innerHTML = data.marketingChecklist.map(group => `
+                <div class="group-card">
+                    <div class="group-title">
+                        <span>${group.titulo}</span>
+                        <div>
+                            <button onclick="addMarketingItem('${group.id}')" class="text-emerald-400 text-xs hover:bg-emerald-500/10 px-2 py-1 rounded">+ Item</button>
+                            <button onclick="editMarketingGroup('${group.id}')" class="text-blue-400 text-xs hover:bg-blue-500/10 px-2 py-1 rounded">✏️</button>
+                            <button onclick="deleteMarketingGroup('${group.id}')" class="text-red-400 text-xs hover:bg-red-500/10 px-2 py-1 rounded">🗑️</button>
+                        </div>
+                    </div>
+                    ${group.itens && group.itens.length ? group.itens.map(item => `
+                        <div class="group-item">
+                            <input type="checkbox" ${item.concluido ? 'checked' : ''} onchange="toggleMarketingItem('${group.id}','${item.id}')" />
+                            <span class="text-sm ${item.concluido ? 'line-through text-gray-500' : 'text-white'}">${item.texto}</span>
+                            <button onclick="deleteMarketingItem('${group.id}','${item.id}')" class="text-red-400 text-xs ml-auto">✕</button>
+                        </div>
+                    `).join('') : '<div class="text-xs text-gray-500">Nenhum item.</div>'}
+                </div>
+            `).join('') || '<p class="text-center text-gray-500 text-xs py-4">Crie seu primeiro grupo clicando em "+ Grupo".</p>';
+        }
+
+        function addMarketingGroup() {
+            const titulo = prompt('Título do grupo:');
+            if (!titulo) return;
+            if (!Array.isArray(data.marketingChecklist)) data.marketingChecklist = [];
+            data.marketingChecklist.push({ id: genId(), titulo, itens: [] });
+            saveData();
+            renderMarketingChecklist();
+            toast('Grupo criado!', 'success');
+        }
+
+        function editMarketingGroup(id) {
+            const group = data.marketingChecklist.find(g => g.id == id);
+            if (!group) return;
+            const novo = prompt('Novo título:', group.titulo);
+            if (novo) { group.titulo = novo; saveData(); renderMarketingChecklist(); toast('Atualizado!', 'success'); }
+        }
+
+        function deleteMarketingGroup(id) {
+            if (!confirm('Remover grupo e todos os itens?')) return;
+            data.marketingChecklist = data.marketingChecklist.filter(g => g.id != id);
+            saveData();
+            renderMarketingChecklist();
+            toast('Grupo removido.', 'success');
+        }
+
+        function addMarketingItem(groupId) {
+            const group = data.marketingChecklist.find(g => g.id == groupId);
+            if (!group) return;
+            const texto = prompt('Descrição do item:');
+            if (!texto) return;
+            if (!group.itens) group.itens = [];
+            group.itens.push({ id: genId(), texto, concluido: false });
+            saveData();
+            renderMarketingChecklist();
+            toast('Item adicionado!', 'success');
+        }
+
+        function toggleMarketingItem(groupId, itemId) {
+            const group = data.marketingChecklist.find(g => g.id == groupId);
+            if (!group) return;
+            const item = group.itens.find(i => i.id == itemId);
+            if (item) { item.concluido = !item.concluido; saveData(); renderMarketingChecklist(); }
+        }
+
+        function deleteMarketingItem(groupId, itemId) {
+            const group = data.marketingChecklist.find(g => g.id == groupId);
+            if (!group) return;
+            group.itens = group.itens.filter(i => i.id != itemId);
+            saveData();
+            renderMarketingChecklist();
+            toast('Item removido.', 'success');
+        }
+
+        // --- Campanhas ---
+        function renderCampanhasHTML() {
+            return `
+            <div class="pb-card">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="title">Campanhas</div>
+                    <span class="text-xs text-gray-400" id="campaignCount">0</span>
+                </div>
+                <div id="campaignForm" class="grid grid-cols-1 sm:grid-cols-5 gap-2 mb-3 bg-black/20 p-3 rounded-xl border border-white/5">
+                    <input type="text" id="campName" placeholder="Nome *" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <select id="campStatus" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm"><option>Planejamento</option><option>Ativa</option><option>Pausada</option><option>Concluída</option></select>
+                    <input type="number" id="campInvest" placeholder="Investimento" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="number" id="campReturn" placeholder="Retorno" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <textarea id="campDesc" placeholder="Estratégia" class="sm:col-span-5 bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm h-16"></textarea>
+                    <button onclick="submitCampaign()" class="btn-primary sm:col-span-5 text-sm">+ Publicar</button>
+                </div>
+                <div id="campaignList" class="space-y-3"></div>
+            </div>
+            `;
+        }
+
+        function renderCampaigns() {
+            const container = document.getElementById('campaignList');
+            if (!container) return;
+            document.getElementById('campaignCount').textContent = data.campaigns.length;
+            container.innerHTML = data.campaigns.map(c => `
+                <div class="p-3 bg-black/20 border border-white/5 rounded-xl text-sm">
+                    <div class="flex justify-between font-bold text-white">
+                        <span>${c.name} [${c.status}]</span>
+                        <div>
+                            <button onclick="lancarCampanhaFinanceiro('${c.id}')" class="text-emerald-400 mr-2 hover:bg-emerald-500/10 px-2 py-0.5 rounded text-[10px]">💰 Lançar</button>
+                            <button onclick="editCampaign('${c.id}')" class="text-blue-400 mr-2"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="deleteCamp('${c.id}')" class="text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <div class="bg-black/20 p-2 rounded">Investido: <span class="text-white font-bold">${fmt(c.invest)}</span></div>
+                        <div class="bg-black/20 p-2 rounded">Retorno: <span class="text-emerald-400 font-bold">${fmt(c.return)}</span></div>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-center text-gray-500 text-xs py-4">Nenhuma campanha.</p>';
+            refreshIcons();
+        }
+
+        function lancarCampanhaFinanceiro(id) {
+            const camp = data.campaigns.find(c => c.id == id);
+            if (!camp) { toast('Campanha não encontrada.', 'error'); return; }
+            if (camp.invest > 0) data.financial.push({ id: genId(), type: 'Saída', amount: camp.invest, desc: `Investimento - ${camp.name}` });
+            if (camp.return > 0) data.financial.push({ id: genId(), type: 'Entrada', amount: camp.return, desc: `Retorno - ${camp.name}` });
+            addHist(`Campanha "${camp.name}" lançada no financeiro`);
+            saveData();
+            renderFin();
+            renderCampaigns();
+            updateDash();
+            toast('Campanha lançada no financeiro!', 'success');
+        }
+
+        function submitCampaign() {
+            const name = document.getElementById('campName').value.trim();
+            if (!name) { toast('Preencha o nome.', 'error'); return; }
+            const status = document.getElementById('campStatus').value;
+            const invest = parseFloat(document.getElementById('campInvest').value) || 0;
+            const ret = parseFloat(document.getElementById('campReturn').value) || 0;
+            const desc = document.getElementById('campDesc').value.trim();
+            const editId = document.getElementById('campEditId')?.value;
+            if (editId) {
+                const c = data.campaigns.find(x => x.id == editId);
+                if (c) { c.name = name; c.status = status; c.invest = invest; c.return = ret; c.desc = desc; addHist(`Campanha "${name}" atualizada`); }
+                document.getElementById('campEditId').value = '';
+                document.getElementById('campSubmitBtn').textContent = '+ Publicar';
+            } else {
+                data.campaigns.push({ id: genId(), name, status, invest, return: ret, desc });
+                addHist(`Campanha "${name}" criada (${status})`);
+            }
+            ['campName', 'campInvest', 'campReturn', 'campDesc'].forEach(id => document.getElementById(id).value = '');
+            saveData();
+            renderCampaigns();
+            updateDash();
+            toast('Campanha salva!', 'success');
+        }
+
+        function editCampaign(id) {
+            const c = data.campaigns.find(x => x.id == id);
+            if (!c) return;
+            document.getElementById('campName').value = c.name;
+            document.getElementById('campStatus').value = c.status;
+            document.getElementById('campInvest').value = c.invest;
+            document.getElementById('campReturn').value = c.return;
+            document.getElementById('campDesc').value = c.desc || '';
+            document.getElementById('campEditId').value = c.id;
+            document.getElementById('campSubmitBtn').textContent = '🔄 Atualizar';
+            toast('Edite e clique em Atualizar.', 'success');
+        }
+
+        function deleteCamp(id) {
+            const c = data.campaigns.find(x => x.id == id);
+            if (c) addHist(`Campanha "${c.name}" removida`);
+            data.campaigns = data.campaigns.filter(c => c.id != id);
+            saveData();
+            renderCampaigns();
+            updateDash();
+        }
+
+        // --- Concorrência ---
+        function renderConcorrenciaHTML() {
+            return `
+            <div class="pb-card">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="title">Concorrentes</div>
+                    <span class="text-xs text-gray-400" id="competitorCount">0</span>
+                </div>
+                <div id="competitorForm" class="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-3 bg-black/20 p-3 rounded-xl border border-white/5">
+                    <input type="text" id="compName" placeholder="Nome *" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="text" id="compInsta" placeholder="@instagram" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <input type="text" id="compLocation" placeholder="Região" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm" />
+                    <select id="compAmeaca" class="bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm"><option value="Baixo">Baixo</option><option value="Médio">Médio</option><option value="Alto">Alto</option></select>
+                    <textarea id="compObs" placeholder="Análise" class="sm:col-span-4 bg-[#0d0d0d] border border-white/10 rounded-xl px-3 py-2 text-sm h-16"></textarea>
+                    <button onclick="submitCompetitor()" class="btn-primary sm:col-span-4 text-sm">+ Monitorar</button>
+                </div>
+                <div id="competitorList" class="space-y-3"></div>
+            </div>
+            `;
+        }
+
+        function renderCompetitors() {
+            const container = document.getElementById('competitorList');
+            if (!container) return;
+            document.getElementById('competitorCount').textContent = data.competitors.length;
+            container.innerHTML = data.competitors.map(c => {
+                const cls = c.ameaca === 'Alto' ? 'badge-high' : c.ameaca === 'Médio' ? 'badge-med' : 'badge-low';
+                return `
+                <div class="p-3 bg-black/20 border border-white/5 rounded-xl flex justify-between items-center text-sm">
+                    <div><span class="font-bold text-white">${c.name}</span> <span class="text-gray-400">📍 ${c.location||'N/I'}</span> <span class="px-2 py-0.5 rounded ${cls}">${c.ameaca||'Baixo'}</span></div>
+                    <div>
+                        <button onclick="editCompetitor('${c.id}')" class="text-blue-400 mr-2"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="deleteComp('${c.id}')" class="text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </div>
+            `}).join('') || '<p class="text-center text-gray-500 text-xs py-4">Nenhum concorrente.</p>';
+            refreshIcons();
+        }
+
+        function submitCompetitor() {
+            const name = document.getElementById('compName').value.trim();
+            if (!name) { toast('Preencha o nome.', 'error'); return; }
+            const insta = document.getElementById('compInsta').value.trim();
+            const loc = document.getElementById('compLocation').value.trim();
+            const ameaca = document.getElementById('compAmeaca').value;
+            const obs = document.getElementById('compObs').value.trim();
+            const editId = document.getElementById('compEditId')?.value;
+            if (editId) {
+                const c = data.competitors.find(x => x.id == editId);
+                if (c) { c.name = name; c.insta = insta; c.location = loc; c.ameaca = ameaca; c.obs = obs; addHist(`Concorrente "${name}" atualizado`); }
+                document.getElementById('compEditId').value = '';
+                document.getElementById('compSubmitBtn').textContent = '+ Monitorar';
+            } else {
+                data.competitors.push({ id: genId(), name, insta, location: loc, ameaca, obs });
+                addHist(`Concorrente "${name}" mapeado`);
+            }
+            ['compName', 'compInsta', 'compLocation', 'compObs'].forEach(id => document.getElementById(id).value = '');
+            saveData();
+            renderCompetitors();
+            updateDash();
+            toast('Concorrente salvo!', 'success');
+        }
+
+        function editCompetitor(id) {
+            const c = data.competitors.find(x => x.id == id);
+            if (!c) return;
+            document.getElementById('compName').value = c.name;
+            document.getElementById('compInsta').value = c.insta || '';
+            document.getElementById('compLocation').value = c.location || '';
+            document.getElementById('compAmeaca').value = c.ameaca || 'Baixo';
+            document.getElementById('compObs').value = c.obs || '';
+            document.getElementById('compEditId').value = c.id;
+            document.getElementById('compSubmitBtn').textContent = '🔄 Atualizar';
+            toast('Edite e clique em Atualizar.', 'success');
+        }
+
+        function deleteComp(id) {
+            const c = data.competitors.find(x => x.id == id);
+            if (c) addHist(`Concorrente "${c.name}" removido`);
+            data.competitors = data.competitors.filter(c => c.id != id);
+            saveData();
+            renderCompetitors();
+            updateDash();
+        }
+
+        // ======================================================================
+        // IA
+        // ======================================================================
+        function renderIA() {
+            return `
+            <div class="pb-card mb-3">
+                <div class="title mb-2">Criativo Ativo</div>
+                <div class="w-full max-w-3xl mx-auto border border-white/5 p-1 rounded-xl">
+                    <a href="#" id="youtubeButtonIA" target="_blank" rel="noopener noreferrer" class="block relative">
+                        <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Vídeo" id="videoThumbnailIA" class="rounded-xl w-full" />
+                        <div class="absolute inset-0 flex items-center justify-center"><div class="bg-red-600/80 rounded-full w-14 h-14 flex items-center justify-center"><i data-lucide="play" class="w-7 h-7 text-white"></i></div></div>
+                    </a>
+                    <p class="text-center text-xs text-gray-400 py-1">📺 Clique para assistir no YouTube</p>
+                </div>
+            </div>
+            <div class="pb-card">
+                <div class="title mb-2">Gerador de Prompt IA V2</div>
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <button onclick="generateIAPrompt()" class="btn-primary text-sm"><i data-lucide="sparkles" class="w-3.5 h-3.5 inline mr-1"></i> Gerar Resumo</button>
+                    <button onclick="copyIAPrompt()" class="btn-secondary text-sm"><i data-lucide="copy" class="w-3.5 h-3.5 inline mr-1"></i> Copiar</button>
+                    <button onclick="downloadIAPrompt()" class="btn-primary text-sm"><i data-lucide="file-text" class="w-3.5 h-3.5 inline mr-1"></i> Baixar .txt</button>
+                </div>
+                <textarea id="iaPromptPreview" readonly class="w-full bg-[#0a0a0a] border border-white/5 rounded-xl px-3 py-2 text-xs font-mono text-[#c9a96e] h-64 resize-y"></textarea>
+            </div>
+            `;
+        }
+
+        function updateVideo() {
+            const url = data.settings.videoUrl || 'https://youtu.be/dQw4w9WgXcQ';
+            document.getElementById('youtubeButtonIA').href = url;
+            let id = '';
+            if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1]?.split('?')[0] || '';
+            else if (url.includes('youtube.com/watch?v=')) id = url.split('v=')[1]?.split('&')[0] || '';
+            const thumb = document.getElementById('videoThumbnailIA');
+            if (thumb) thumb.src = id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg';
+        }
+
+        function generateIAPrompt() {
+            const total = data.clients.length;
+            const inc = data.financial.filter(f => f.type === 'Entrada').reduce((s, f) => s + (f.amount || 0), 0);
+            const ticket = total ? inc / total : 0;
+            const active = data.campaigns.filter(c => c.status === 'Ativa').length;
+            const best = data.campaigns.reduce((b, c) => (c.return - c.invest) > (b.return - b.invest) ? c : b, { invest: 0, return: 0, name: 'Nenhuma' });
+            const alta = data.competitors.filter(c => c.ameaca === 'Alto').length;
+            const origens = {};
+            data.clients.forEach(c => { const o = c.origem || 'N/I'; origens[o] = (origens[o] || 0) + 1; });
+            const sugestoes = [];
+            if (Object.entries(origens).sort((a,b) => b[1]-a[1])[0]?.[0] === 'Orgânico (Instagram)') sugestoes.push('Invista mais em conteúdo orgânico no Instagram.');
+            if (active === 0) sugestoes.push('Considere iniciar tráfego pago para novos leads.');
+            if (inc < 5000) sugestoes.push('Aumente o ticket médio com combos ou upgrades.');
+            if (alta > 2) sugestoes.push('Analise diferenciais dos concorrentes de alto nível.');
+            if (data.stock.some(s => s.qty <= 3)) sugestoes.push('Reponha insumos críticos.');
+            if (sugestoes.length < 3) sugestoes.push('Crie conteúdo sobre cicatrização para pós-venda.');
+            if (sugestoes.length < 3) sugestoes.push('Ofereça desconto para indicações.');
+
+            const prompt = `
+        ========== RESUMO EXECUTIVO SAVANNAH_OS ==========
+
+        📊 RESULTADOS GERAIS
+        • Clientes: ${total}
+        • Faturamento Total: ${fmt(inc)}
+        • Ticket Médio: ${fmt(ticket)}
+        • Saldo: ${fmt(inc - data.financial.filter(f => f.type === 'Saída').reduce((s, f) => s + (f.amount || 0), 0))}
+
+        📈 ANÁLISE DE MARKETING
+        • Leads por Origem: ${Object.entries(origens).map(([k,v]) => `${k}: ${v}`).join(' | ')}
+        • Melhor Campanha: ${best.name} (Invest: ${fmt(best.invest)} | Retorno: ${fmt(best.return)})
+        • Campanhas Ativas: ${active}
+
+        🎯 BENCHMARKING
+        • Concorrentes: ${data.competitors.length} | Alto nível: ${alta}
+
+        💡 AÇÕES SUGERIDAS:
+        ${sugestoes.map((s, i) => `${i+1}. ${s}`).join('\n')}
+            `;
+            document.getElementById('iaPromptPreview').value = prompt;
+            toast('Resumo gerado!', 'success');
+        }
+
+        function copyIAPrompt() {
+            const t = document.getElementById('iaPromptPreview').value;
+            if (!t) { toast('Gere o resumo primeiro.', 'error'); return; }
+            navigator.clipboard.writeText(t).then(() => toast('Copiado!', 'success'));
+        }
+
+        function downloadIAPrompt() {
+            const t = document.getElementById('iaPromptPreview').value;
+            if (!t) { toast('Gere o resumo primeiro.', 'error'); return; }
+            const blob = new Blob([t], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'resumo_ia_savannah.txt';
+            a.click();
+            toast('Baixado!', 'success');
+        }
+
+        // ======================================================================
+        // NOTIFICAÇÕES
+        // ======================================================================
+        function genNotifs() {
+            const notifs = [];
+            const hoje = new Date();
+            data.lembretes.forEach(l => {
+                if (l.concluido) return;
+                const d = new Date(l.dataLembrete);
+                if (d < hoje) notifs.push(`⏰ Lembrete atrasado: ${l.nome}`);
+            });
+            data.stock.forEach(i => { if (i.qty <= 3) notifs.push(`⚠️ Estoque crítico: ${i.name} (${i.qty})`); });
+            data.clients.forEach(c => {
+                if (c.stage === 'Concluído' && !data.calendarEvents.some(e => e.title.includes(c.name) && e.title.includes('Healing'))) {
+                    notifs.push(`📸 Cliente "${c.name}" sem Healing Check.`);
+                }
+            });
+            document.getElementById('notifCount').textContent = notifs.length;
+            window._notifs = notifs;
+        }
+
+        function toggleNotif() {
+            const m = document.getElementById('notifDrop');
+            m.classList.toggle('active');
+            if (m.classList.contains('active')) {
+                const list = document.getElementById('notifList');
+                const n = window._notifs || [];
+                list.innerHTML = n.length ? n.map(x => `<div class="notif-item">${x}</div>`).join('') : '<div class="notif-item text-gray-500">Nenhuma notificação.</div>';
+            }
+        }
+
+        function closeNotif() { document.getElementById('notifDrop').classList.remove('active'); }
+
+        // ======================================================================
+        // HISTÓRICO
+        // ======================================================================
+        function addHist(acao) {
+            data.historico.unshift({ id: genId(), acao, data: new Date().toISOString() });
+            if (data.historico.length > 200) data.historico.pop();
+            saveData();
+        }
+
+        // ======================================================================
+        // EXPORTAÇÕES CSV
+        // ======================================================================
+        function exportClientsCSV() {
+            const rows = [['Nome', 'Telefone', 'Origem', 'Estágio', 'Total Gasto']];
+            data.clients.forEach(c => {
+                const total = data.financial.filter(f => f.type === 'Entrada' && f.desc.toLowerCase().includes(c.name.toLowerCase())).reduce((s, f) => s + f.amount, 0);
+                rows.push([c.name, c.phone || '', c.origem || '', c.stage || '', total.toFixed(2)]);
+            });
+            const csv = rows.map(r => r.join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'clientes_savannah.csv';
+            a.click();
+            toast('CSV clientes baixado!', 'success');
+        }
+
+        function exportFinancialCSV() {
+            const rows = [['Data', 'Tipo', 'Valor', 'Descrição']];
+            data.financial.forEach(f => {
+                rows.push([fmtDate(new Date(f.id)), f.type, f.amount.toFixed(2), f.desc]);
+            });
+            const csv = rows.map(r => r.join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'financeiro_savannah.csv';
+            a.click();
+            toast('CSV financeiro baixado!', 'success');
+        }
+
+        // ======================================================================
+        // INIT
+        // ======================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            refreshIcons();
+        });
+    </script>
+</body>
+</html>
